@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema({
     }
 });
 
-// create static method on the model
+// create static method (signup) on the model
 userSchema.statics.signup = async function(email, password) {
     // validation
     if (!email || !password) throw Error('All fields must be filled.');
@@ -32,5 +32,15 @@ userSchema.statics.signup = async function(email, password) {
     const user = await this.create({ email, password: hash });
     return user;
 };
+
+// create static method (login) on the model
+userSchema.statics.login = async function(email, password) {
+    if (!email || !password) throw Error('All fields must be filled.');
+    const user = await this.findOne({ email });
+    if (!user) throw Error('The email is invalid.');
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) throw Error('Incorrect password');
+    return user
+}
 
 module.exports = mongoose.model('User', userSchema);
